@@ -1,5 +1,4 @@
-# This Dockerfile is for Render deployment
-# It uses the same content as Dockerfile-collab-render
+# Dockerfile for Render deployment
 # syntax = docker/dockerfile:1.2
 
 FROM rust:1.91.1-bookworm as builder

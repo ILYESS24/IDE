@@ -1,194 +1,149 @@
-# Guide de Déploiement sur Render
+# 🚀 Guide de Déploiement Zed Collab sur Render
 
-Ce guide vous explique comment déployer le serveur Zed Collab sur Render avec 512 MB de RAM.
+Guide complet pour déployer le serveur de collaboration Zed sur Render.
 
 ## 📋 Prérequis
 
-1. Un compte Render (gratuit disponible sur [render.com](https://render.com))
-2. Un dépôt Git (GitHub, GitLab, ou Bitbucket) contenant ce code
-3. Compréhension de base de Docker et PostgreSQL
+- Compte Render ([render.com](https://render.com))
+- Dépôt Git (GitHub/GitLab/Bitbucket) avec ce code
+- Compréhension de base de Docker et PostgreSQL
 
-## 🚀 Déploiement Rapide
+## 🎯 Déploiement Rapide (5 minutes)
 
-### Option 1 : Déploiement via render.yaml (Recommandé)
+### Option 1 : Via Blueprint (Recommandé)
 
-1. **Connecter votre dépôt Git à Render**
-   - Allez sur [dashboard.render.com](https://dashboard.render.com)
-   - Cliquez sur "New +" → "Blueprint"
-   - Connectez votre dépôt Git
-   - Render détectera automatiquement le fichier `render.yaml`
+1. **Connecter le dépôt**
+   - [dashboard.render.com](https://dashboard.render.com) → "New +" → "Blueprint"
+   - Connectez votre dépôt `ILYESS24/ZEDAURION`
+   - Render détectera automatiquement `render.yaml`
 
-2. **Créer la base de données PostgreSQL**
-   - Dans le dashboard Render, créez une nouvelle base de données PostgreSQL
-   - Notez l'URL de connexion (format: `postgresql://user:pass@host:port/dbname`)
+2. **Configurer les variables d'environnement**
+   - Dans le service `zed-collab` → Settings → Environment Variables
+   - Ajoutez :
+     ```
+     DATABASE_URL=<Internal Database URL de zed-postgres>
+     API_TOKEN=<générez un token avec: openssl rand -hex 32>
+     ```
+   - Les autres variables sont déjà définies dans `render.yaml`
 
-3. **Configurer les variables d'environnement**
-   - Dans les paramètres du service web, ajoutez :
-     - `DATABASE_URL` : L'URL de votre base de données PostgreSQL
-     - `API_TOKEN` : Générez un token sécurisé (ex: `openssl rand -hex 32`)
-
-4. **Déployer**
-   - Render va automatiquement :
-     - Construire l'image Docker
-     - Exécuter les migrations de base de données
-     - Démarrer le serveur
+3. **Déployer**
+   - Render créera automatiquement le service et la base de données
+   - Le build prendra 15-20 minutes (compilation Rust)
 
 ### Option 2 : Déploiement Manuel
 
-1. **Créer un nouveau service Web**
-   - Type: Web Service
-   - Runtime: Docker
-   - Dockerfile Path: `./Dockerfile-collab`
-   - Docker Context: `.`
-   - Plan: Starter (512 MB) ou Standard (1 GB recommandé)
-
-2. **Créer une base de données PostgreSQL**
+1. **Créer la base de données PostgreSQL**
+   - Dashboard → "New +" → "PostgreSQL"
+   - Name: `zed-postgres`
    - Plan: Starter (256 MB) ou Standard (1 GB)
-   - Notez l'URL de connexion
+   - Region: oregon (ou votre région)
+   - Notez l'**Internal Database URL**
 
-3. **Configurer les variables d'environnement** (voir section ci-dessous)
+2. **Créer le service web**
+   - Dashboard → "New +" → "Web Service"
+   - Connectez votre dépôt Git
+   - Configuration :
+     - **Name**: `zed-collab`
+     - **Runtime**: `Docker`
+     - **Dockerfile Path**: `./Dockerfile`
+     - **Docker Context**: `.`
+     - **Plan**: Starter (512 MB) ou Standard (1 GB)
+     - **Region**: Même région que la base de données
 
-4. **Déployer**
+3. **Variables d'environnement**
+   ```
+   HTTP_PORT=10000
+   DATABASE_URL=<Internal Database URL de zed-postgres>
+   API_TOKEN=<générez un token>
+   DATABASE_MAX_CONNECTIONS=20
+   INVITE_LINK_PREFIX=https://zed.dev/invite/
+   ZED_ENVIRONMENT=production
+   RUST_LOG=info
+   LOG_JSON=true
+   ```
 
-## 🔧 Variables d'Environnement Requises
+4. **Générer API_TOKEN**
+   ```bash
+   # PowerShell
+   $chars = '0123456789abcdef'; $token = ''; for ($i=0; $i -lt 64; $i++) { $token += $chars[(Get-Random -Maximum $chars.Length)] }; Write-Host $token
+   
+   # Ou en ligne: https://www.random.org/strings/
+   ```
+
+## 🔧 Configuration des Variables d'Environnement
 
 ### Variables Obligatoires
 
-```bash
-# Port HTTP (Render utilise PORT, mais on mappe vers HTTP_PORT)
-HTTP_PORT=10000
-
-# Base de données PostgreSQL
-DATABASE_URL=postgresql://user:password@host:port/dbname
-
-# Token API (générez un token sécurisé)
-API_TOKEN=votre_token_securise_ici
-
-# Préfixe pour les liens d'invitation
-INVITE_LINK_PREFIX=https://zed.dev/invite/
-
-# Environnement
-ZED_ENVIRONMENT=production
-
-# Configuration base de données
-DATABASE_MAX_CONNECTIONS=20
-
-# Logging
-RUST_LOG=info
-LOG_JSON=true
-```
+| Variable | Description | Exemple |
+|----------|-------------|---------|
+| `DATABASE_URL` | URL de connexion PostgreSQL | `postgresql://user:pass@host:port/dbname` |
+| `API_TOKEN` | Token d'authentification API | `cf58186cc42dc488989479cc4219ce56...` |
 
 ### Variables Optionnelles
 
-```bash
-# LiveKit (pour audio/vidéo)
-LIVEKIT_SERVER=
-LIVEKIT_KEY=
-LIVEKIT_SECRET=
+| Variable | Valeur par défaut | Description |
+|----------|-------------------|-------------|
+| `HTTP_PORT` | `10000` | Port HTTP du serveur |
+| `DATABASE_MAX_CONNECTIONS` | `20` | Nombre max de connexions DB |
+| `INVITE_LINK_PREFIX` | `https://zed.dev/invite/` | Préfixe pour les liens d'invitation |
+| `ZED_ENVIRONMENT` | `production` | Environnement de déploiement |
+| `RUST_LOG` | `info` | Niveau de log (error, warn, info, debug) |
+| `LOG_JSON` | `true` | Format JSON pour les logs |
 
-# Blob Store (pour stockage de fichiers)
-BLOB_STORE_URL=
-BLOB_STORE_REGION=
-BLOB_STORE_ACCESS_KEY=
-BLOB_STORE_SECRET_KEY=
-BLOB_STORE_BUCKET=
+## 🚨 Résolution de Problèmes
 
-# LLM Database (pour fonctionnalités IA)
-LLM_DATABASE_URL=
-LLM_DATABASE_MAX_CONNECTIONS=10
-LLM_API_SECRET=
+### Problème : Render utilise un Dockerfile Python au lieu de Rust
 
-# Clés API pour modèles IA
-OPENAI_API_KEY=
-GOOGLE_AI_API_KEY=
-ANTHROPIC_API_KEY=
-```
+**Symptômes** : Les logs montrent `FROM python:3.11-slim` et cherchent `requirements.txt` avec `*aurora_ai*`
 
-## 📝 Étapes Détaillées
+**Cause** : Render utilise un Dockerfile Python qui n'existe pas dans votre dépôt. Votre Dockerfile à la racine est correct (Rust), mais Render ne l'utilise pas.
 
-### 1. Préparer le Code
+**Solution** :
+1. Service `zed-collab` → Settings → Build & Deploy
+2. Vérifiez et corrigez :
+   - **Dockerfile Path** : `./Dockerfile` (ou laissez vide)
+   - **Docker Context** : `.`
+   - **Runtime** : `Docker`
+3. Supprimez toute configuration Python :
+   - Build Command avec `pip install`
+   - Start Command avec Python
+   - Autres références à Python ou `requirements.txt`
+4. Save Changes → Manual Deploy → Clear build cache & deploy
 
-Assurez-vous que votre dépôt contient :
-- ✅ `Dockerfile-collab`
-- ✅ `render.yaml` (optionnel mais recommandé)
-- ✅ Le code source complet
+**Vérification** : Après redéploiement, les logs doivent montrer :
+- ✅ `FROM rust:1.91.1-bookworm` (pas Python)
+- ✅ `cargo build --release --package collab`
+- ✅ Pas de recherche de `requirements.txt` ou `aurora_ai`
 
-### 2. Créer la Base de Données
+**Si ça ne fonctionne pas** :
+1. Supprimez complètement le service `zed-collab`
+2. Recréez-le via Blueprint (`render.yaml`) :
+   - Dashboard → "New +" → "Blueprint"
+   - Connectez votre dépôt `ILYESS24/ZEDAURION`
+   - Render créera automatiquement le service avec la bonne configuration
 
-1. Dans Render Dashboard → "New +" → "PostgreSQL"
-2. Choisissez :
-   - **Name**: `zed-postgres`
-   - **Plan**: Starter (256 MB) ou Standard (1 GB)
-   - **Region**: Même région que votre service web
-3. Notez l'**Internal Database URL** (pour les services dans le même réseau)
-   - Format: `postgresql://user:password@host:port/dbname`
+### Problème : Build échoue (Out of Memory)
 
-### 3. Créer le Service Web
+**Solution** :
+- Passez au plan **Standard** (1 GB) au lieu de Starter (512 MB)
+- Réduisez `DATABASE_MAX_CONNECTIONS` à `10`
 
-1. Dans Render Dashboard → "New +" → "Web Service"
-2. Connectez votre dépôt Git
-3. Configurez :
-   - **Name**: `zed-collab`
-   - **Region**: Même région que la base de données
-   - **Branch**: `main` (ou votre branche)
-   - **Root Directory**: `/` (racine)
-   - **Runtime**: Docker
-   - **Dockerfile Path**: `./Dockerfile-collab`
-   - **Docker Context**: `.`
-   - **Plan**: Starter (512 MB) ou Standard (1 GB)
+### Problème : Erreur de connexion à la base de données
 
-### 4. Configurer les Variables d'Environnement
+**Vérifications** :
+- `DATABASE_URL` est correcte (Internal Database URL)
+- La base de données est "Available" (pas "Paused")
+- Même région pour le service et la base de données
 
-Dans les paramètres du service web, ajoutez :
+### Problème : Service ne démarre pas
 
-**Variables Obligatoires :**
-```
-HTTP_PORT=10000
-DATABASE_URL=<votre_url_postgres>
-API_TOKEN=<générez_un_token>
-INVITE_LINK_PREFIX=https://zed.dev/invite/
-ZED_ENVIRONMENT=production
-DATABASE_MAX_CONNECTIONS=20
-RUST_LOG=info
-LOG_JSON=true
-```
+**Vérifications** :
+- Les logs montrent des erreurs
+- `API_TOKEN` est défini
+- `DATABASE_URL` est correcte
+- Health check : `https://votre-service.onrender.com/healthz`
 
-**Pour générer un API_TOKEN sécurisé :**
-```bash
-# Sur Linux/Mac
-openssl rand -hex 32
-
-# Ou en ligne
-# https://www.random.org/strings/
-```
-
-### 5. Lier la Base de Données
-
-1. Dans les paramètres du service web
-2. Section "Connections"
-3. Cliquez sur "Link Database"
-4. Sélectionnez votre base de données PostgreSQL
-5. Render ajoutera automatiquement `DATABASE_URL` si vous utilisez l'Internal Database URL
-
-### 6. Déployer
-
-1. Cliquez sur "Create Web Service"
-2. Render va :
-   - Cloner votre dépôt
-   - Construire l'image Docker (peut prendre 10-20 minutes)
-   - Exécuter les migrations automatiquement
-   - Démarrer le serveur
-
-### 7. Vérifier le Déploiement
-
-1. Attendez que le build soit terminé (statut "Live")
-2. Vérifiez les logs pour voir si le serveur démarre correctement
-3. Testez l'endpoint de santé : `https://votre-service.onrender.com/healthz`
-4. Devrait retourner : `{"status":"ok"}`
-
-## 🔍 Vérification et Dépannage
-
-### Vérifier que le serveur fonctionne
+## ✅ Vérification du Déploiement
 
 ```bash
 # Health check
@@ -197,99 +152,30 @@ curl https://votre-service.onrender.com/healthz
 # Devrait retourner: {"status":"ok"}
 ```
 
-### Vérifier les logs
+## 📊 Ressources Recommandées
 
-Dans le dashboard Render :
-1. Allez dans votre service web
-2. Cliquez sur "Logs"
-3. Vérifiez qu'il n'y a pas d'erreurs
+| Composant | Plan Starter | Plan Standard |
+|-----------|--------------|---------------|
+| Service Web | 512 MB RAM | 1 GB RAM |
+| Base de données | 256 MB | 1 GB |
 
-### Problèmes Courants
+**Recommandation** : Utilisez Standard (1 GB) pour la production.
 
-#### ❌ Erreur: "Failed to connect to database"
-- Vérifiez que `DATABASE_URL` est correctement configurée
-- Vérifiez que la base de données est dans la même région
-- Vérifiez que la base de données est "Available"
+## 📁 Fichiers de Configuration
 
-#### ❌ Erreur: "Out of memory"
-- Passez au plan Standard (1 GB) au lieu de Starter (512 MB)
-- Réduisez `DATABASE_MAX_CONNECTIONS` à 10
+- `render.yaml` : Configuration Blueprint Render
+- `Dockerfile` : Image Docker pour le build Rust
+- `env.example` : Exemple de variables d'environnement
+- `.dockerignore` : Fichiers ignorés lors du build
 
-#### ❌ Erreur: "Migration failed"
-- Vérifiez que la base de données est accessible
-- Vérifiez les logs pour plus de détails
-- Les migrations s'exécutent automatiquement au démarrage
+## 🔗 Liens Utiles
 
-#### ❌ Build échoue
-- Vérifiez que le Dockerfile est correct
-- Vérifiez que toutes les dépendances sont disponibles
-- Le build peut prendre 15-20 minutes (normal pour Rust)
-
-## 💰 Coûts Estimés
-
-### Plan Starter (512 MB)
-- **Web Service**: Gratuit (avec limitations) ou $7/mois
-- **PostgreSQL**: Gratuit (256 MB) ou $7/mois
-- **Total**: Gratuit (avec limitations) ou $14/mois
-
-### Plan Standard (1 GB) - Recommandé
-- **Web Service**: $25/mois
-- **PostgreSQL**: $20/mois (1 GB)
-- **Total**: $45/mois
-
-## 🎯 Optimisations pour 512 MB
-
-Si vous devez absolument utiliser 512 MB :
-
-1. **PostgreSQL externe** (obligatoire)
-   - Ne pas installer PostgreSQL sur le même serveur
-   - Utiliser Render Postgres séparé
-
-2. **Réduire les connexions**
-   ```bash
-   DATABASE_MAX_CONNECTIONS=10  # Au lieu de 20
-   ```
-
-3. **Réduire les logs**
-   ```bash
-   RUST_LOG=warn  # Au lieu de info
-   ```
-
-4. **Désactiver LiveKit**
-   - Ne pas configurer les variables LiveKit
-   - Le serveur fonctionnera sans audio/vidéo
-
-5. **Configuration PostgreSQL optimisée**
-   - Dans Render Postgres, limitez les connexions
-   - Utilisez le plan Starter (256 MB)
-
-## 📚 Ressources
-
+- [Dashboard Render](https://dashboard.render.com)
 - [Documentation Render](https://render.com/docs)
-- [Documentation Docker](https://docs.docker.com/)
-- [Documentation PostgreSQL](https://www.postgresql.org/docs/)
+- [Documentation Zed](https://zed.dev/docs)
 
-## ✅ Checklist de Déploiement
+## 📝 Notes
 
-- [ ] Compte Render créé
-- [ ] Dépôt Git connecté
-- [ ] Base de données PostgreSQL créée
-- [ ] Service web créé
-- [ ] Variables d'environnement configurées
-- [ ] Base de données liée au service
-- [ ] Build réussi
-- [ ] Health check fonctionne
-- [ ] Logs sans erreurs
-
-## 🆘 Support
-
-Si vous rencontrez des problèmes :
-1. Vérifiez les logs dans Render Dashboard
-2. Vérifiez que toutes les variables d'environnement sont configurées
-3. Consultez la documentation Render
-4. Vérifiez que la base de données est accessible
-
----
-
-**Note importante** : Pour un déploiement en production avec de nombreux utilisateurs, le plan Standard (1 GB) est fortement recommandé.
-
+- Le build Rust prend 15-20 minutes
+- Les migrations de base de données s'exécutent automatiquement au démarrage
+- Le service redémarre automatiquement après chaque push Git (si auto-deploy est activé)
