@@ -1,0 +1,17 @@
+{
+  "name": "openvscode-server-vercel",
+  "version": "1.0.0",
+  "description": "OpenVSCode Server for Vercel deployment",
+  "main": "openvscode-server-main/out/server-main.js",
+  "scripts": {
+    "dev": "cd openvscode-server-main && node out/server-main.js --port $PORT --host 0.0.0.0",
+    "build": "cd openvscode-server-main && npm ci && npm run compile",
+    "start": "cd openvscode-server-main && node out/server-main.js --port $PORT --host 0.0.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["vscode", "ide", "editor"],
+  "author": "",
+  "license": "MIT"
+}
