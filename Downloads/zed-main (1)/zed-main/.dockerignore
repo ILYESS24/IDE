@@ -15,8 +15,7 @@ target/
 docs/
 *.md
 !DEPLOIEMENT_RENDER.md
-!QUICK_START_RENDER.md
-!README_RENDER.md
+!DIAGNOSTIC_RENDER.md
 
 # Ignore scripts
 script/
@@ -38,10 +37,11 @@ script/
 .DS_Store
 Thumbs.db
 
-# Ignore other Dockerfiles (we only need Dockerfile-collab-render)
-Dockerfile
-Dockerfile-*
-!Dockerfile-collab-render
+# Keep the main Dockerfile (needed for Render)
+# Ignore other Dockerfiles
+Dockerfile-collab
+Dockerfile-distros
+Dockerfile-cross
 
 # Ignore compose files
 docker-compose.yml

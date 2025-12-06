@@ -39,16 +39,19 @@ WORKDIR /app
 COPY --from=builder /app/collab /app/collab
 COPY --from=builder /app/crates/collab/migrations /app/migrations
 COPY --from=builder /app/crates/collab/migrations_llm /app/migrations_llm
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 ENV MIGRATIONS_PATH=/app/migrations
 ENV LLM_DATABASE_MIGRATIONS_PATH=/app/migrations_llm
 
-# Render utilise la variable PORT, mais le serveur utilise HTTP_PORT
-# On mappe PORT vers HTTP_PORT si HTTP_PORT n'est pas défini
-ENV HTTP_PORT=${HTTP_PORT:-10000}
+# Render injecte automatiquement PORT, mais le serveur utilise HTTP_PORT
+# Le script d'entrée mappe PORT vers HTTP_PORT si nécessaire
+ENV HTTP_PORT=10000
 
 # Exposer le port
 EXPOSE 10000
 
 # Commande par défaut: démarrer le serveur en mode "all" (collab + api)
-ENTRYPOINT ["/app/collab", "serve", "all"]
+# Utilise le script d'entrée pour mapper PORT vers HTTP_PORT
+ENTRYPOINT ["/app/docker-entrypoint.sh", "serve", "all"]
 
