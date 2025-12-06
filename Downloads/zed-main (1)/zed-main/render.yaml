@@ -82,65 +82,9 @@ services:
     
     # Health check
     healthCheckPath: /healthz
-    
+
     # Build command (géré par Dockerfile)
     # Start command (géré par Dockerfile ENTRYPOINT)
-
-  - type: web
-    name: workflow-automation
-    env: node
-    nodeVersion: 22.16.0
-    region: oregon
-    plan: starter
-    rootDir: n8n
-    buildCommand: pnpm install --no-frozen-lockfile && pnpm build
-    startCommand: cd packages/cli && node dist/index.js start
-    envVars:
-      - key: NODE_ENV
-        value: production
-
-      # Render fournit automatiquement PORT, n8n l'utilise directement
-      # ❌ ERREUR CORRIGÉE: Suppression de la référence circulaire N8N_PORT
-      # Render injecte PORT automatiquement, pas besoin de N8N_PORT
-      
-      # Configuration de la base de données PostgreSQL
-      - key: DB_TYPE
-        value: postgresdb
-      
-      - key: DB_POSTGRESDB_HOST
-        fromDatabase:
-          name: workflow-automation-db
-          property: host
-      
-      - key: DB_POSTGRESDB_PORT
-        fromDatabase:
-          name: workflow-automation-db
-          property: port
-      
-      - key: DB_POSTGRESDB_DATABASE
-        fromDatabase:
-          name: workflow-automation-db
-          property: database
-      
-      - key: DB_POSTGRESDB_USER
-        fromDatabase:
-          name: workflow-automation-db
-          property: user
-      
-      - key: DB_POSTGRESDB_PASSWORD
-        fromDatabase:
-          name: workflow-automation-db
-          property: password
-      
-      # Configuration de l'URL de base (optionnel, Render le fait automatiquement)
-      - key: N8N_PROTOCOL
-        value: https
-      
-      # Désactiver le tunnel (non nécessaire sur Render)
-      - key: N8N_DISABLE_PRODUCTION_MAIN_PROCESS
-        value: "false"
-    
-    healthCheckPath: /healthz
 
 databases:
   - name: zed-postgres
@@ -149,10 +93,4 @@ databases:
     # PostgreSQL 15 par défaut sur Render
     # La DATABASE_URL sera automatiquement fournie comme variable d'environnement
     # DATABASE_URL sera au format: postgresql://user:password@host:port/dbname
-
-  - name: workflow-automation-db
-    databaseName: workflow_automation
-    user: workflow_automation_user
-    plan: starter
-    region: oregon
 
