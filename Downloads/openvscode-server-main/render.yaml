@@ -2,7 +2,7 @@ services:
   - type: web
     name: openvscode-server
     runtime: docker
-    dockerfilePath: ./Dockerfile
+    dockerfilePath: ./docker/Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
