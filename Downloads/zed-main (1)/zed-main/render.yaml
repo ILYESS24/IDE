@@ -92,9 +92,7 @@ services:
     nodeVersion: 22.16.0
     region: oregon
     plan: starter
-    # ⚠️ ATTENTION: Le dossier Downloads/ est ignoré par .gitignore
-    # Vous devez copier n8n dans le repo ou utiliser un repo Git séparé
-    rootDir: Downloads/n8n-master/n8n-master
+    rootDir: n8n
     buildCommand: pnpm install --no-frozen-lockfile && pnpm build
     startCommand: cd packages/cli && node dist/index.js start
     envVars:
