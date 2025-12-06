@@ -2,8 +2,9 @@ services:
   - type: web
     name: openvscode-server
     runtime: node
-    buildCommand: "echo 'Build handled by start script'"
-    startCommand: "chmod +x render-start.sh && ./render-start.sh"
+    rootDir: openvscode-server-main
+    buildCommand: "npm ci && npm run build"
+    startCommand: "npm start"
     envVars:
       - key: NODE_ENV
         value: production
