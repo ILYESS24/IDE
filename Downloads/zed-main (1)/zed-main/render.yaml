@@ -98,9 +98,12 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Render fournit automatiquement PORT, n8n l'utilise directement
-      # N8N_PORT n'est pas nécessaire car n8n utilise PORT par défaut
-      # Si nécessaire, vous pouvez définir: N8N_PORT=${PORT}
+      # Render fournit automatiquement PORT, n8n l'utilise via N8N_PORT ou PORT
+      - key: N8N_PORT
+        fromService:
+          type: web
+          name: workflow-automation
+          property: port
       # Configuration de la base de données PostgreSQL
       - key: DB_TYPE
         value: postgresdb
