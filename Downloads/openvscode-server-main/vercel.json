@@ -11,10 +11,5 @@
       "src": "/(.*)",
       "dest": "package.json"
     }
-  ],
-  "functions": {
-    "package.json": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
