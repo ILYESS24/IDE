@@ -1,0 +1,12 @@
+{
+  "name": "openvscode-server-deploy",
+  "version": "1.0.0",
+  "description": "OpenVSCode Server deployment wrapper",
+  "scripts": {
+    "build": "cd openvscode-server-main && npm ci && npm run build",
+    "start": "cd openvscode-server-main && npm start"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
