@@ -1,8 +1,9 @@
 # Dockerfile pour OpenVSCode Server sur Render
 FROM node:18-bullseye-slim
 
-# Installer les dépendances système nécessaires
+# Installer les dépendances système nécessaires pour OpenVSCode Server
 RUN apt-get update && apt-get install -y \
+    build-essential \
     git \
     curl \
     wget \
@@ -15,7 +16,7 @@ WORKDIR /app
 COPY package*.json ./
 COPY render-start.sh ./
 
-# Installer les dépendances
+# Installer les dépendances Node.js
 RUN npm ci
 
 # Copier le code source
@@ -29,5 +30,3 @@ EXPOSE 3000
 
 # Commande de démarrage
 CMD ["npm", "run", "render-start"]
-
-
