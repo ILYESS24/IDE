@@ -1,0 +1,61 @@
+# Ignore everything except what we need for the collab server build
+# This prevents copying unnecessary files and reduces build context size
+
+# Ignore all Downloads folders (they contain unrelated projects)
+Downloads/
+
+# Ignore target directory (will be built in Docker)
+target/
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore documentation
+docs/
+*.md
+!DEPLOIEMENT_RENDER.md
+!QUICK_START_RENDER.md
+!README_RENDER.md
+
+# Ignore scripts
+script/
+
+# Ignore test files
+**/test/
+**/tests/
+**/*_test.rs
+**/*.test.*
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore other Dockerfiles (we only need Dockerfile-collab-render)
+Dockerfile
+Dockerfile-*
+!Dockerfile-collab-render
+
+# Ignore compose files
+docker-compose.yml
+compose.yml
+
+# Ignore nix files
+*.nix
+flake.lock
+
+# Keep only what's needed for building
+!Cargo.toml
+!Cargo.lock
+!crates/
+!extensions/
+!.cargo/
+!rust-toolchain.toml
+
