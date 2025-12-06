@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: openvscode-server
+    runtime: node
+    buildCommand: "cd openvscode-server-main && npm ci && npm run build"
+    startCommand: "cd openvscode-server-main && npm start"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: openvscode-server
+          property: port
+      - key: VSCODE_SERVER_HOST
+        value: 0.0.0.0
+      - key: VSCODE_SERVER_PORT
+        fromService:
+          type: web
+          name: openvscode-server
+          property: port
+
+
