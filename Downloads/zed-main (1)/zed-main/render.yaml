@@ -2,7 +2,7 @@ services:
   - type: web
     name: zed-collab
     runtime: docker
-    dockerfilePath: ./Dockerfile-collab-render
+    dockerfilePath: ./Dockerfile
     dockerContext: .
     plan: starter  # 512 MB RAM - changez à "standard" (1GB) pour de meilleures performances
     region: oregon  # ou frankfurt, singapore, ohio, virginia
